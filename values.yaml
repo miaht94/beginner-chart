@@ -1,0 +1,13 @@
+favorite:
+  drink: "coffee"
+  food: "meat"
+
+pizzaToppings:
+  - mushrooms
+  - cheese
+  - peppers
+  - onions
+
+services:
+  - name: authentication
+    port:
