@@ -1,17 +1,20 @@
+{{- range $service := .Values.services }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "MarshTravel.name" }}
+  name: {{ $service.name }}
   labels:
-    {{- include "MarshTravel.labels" . | nindent 4 -}}
-    {{- if .extendLabels }}
-    {{ .extendLabels }}
-    {{- end }}
+    marshTravel.serviceName: {{ $service.name }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ $service.serviceType }}
   ports:
-    - port: {{ .sourcePort }}
-      protocol: {{ default "TCP" .portProtocol -}}
-      name: {{ default "http" .portName -}}
+    {{- range $port := $service.ports }}
+    - port: {{ $port.containerPort }}
+      name: {{ $port.name | lower | trunc 15 }}
+      protocol: {{ $port.protocol }}
+      targetPort: {{ $port.targetPort }}
+    {{- end }}
   selector:
-      bitnews.app: backend
+      marshTravel.serviceName: {{ $service.name | snakecase | lower | replace "_" "-"}}
+---
+{{- end }}

@@ -1,13 +1,64 @@
-favorite:
-  drink: "coffee"
-  food: "meat"
-
-pizzaToppings:
-  - mushrooms
-  - cheese
-  - peppers
-  - onions
-
+hostname: marshtravel.com
 services:
-  - name: authentication
-    port:
+  - name: authentication # Require
+    revisionHistoryLimit: 1 # Require
+    serviceType: ClusterIP # Require
+    ports: # require at least 1 port
+      - name: authPort # Require and unique for all
+        containerPort: 80 #Require
+        protocol: TCP # [TCP, UDP] Require
+        targetPort: 8080 # Required, If using service type NodePort or ClusterIP it must be unique
+      - name: otherPort # Require 
+        containerPort: 90 #Require
+        protocol: TCP # [TCP, UDP] Require
+        targetPort: 8081 # Required, If using service kind NodePort it must be unique
+    replicasCount: 1 # Require if autoscaling.enable is false
+    autoscaling: # optional
+      enable: false
+    podTemplate:
+      podAnnotations:
+        podAnnotationsA: A
+        podAnnotationsB: B
+      image:
+        name: nginx
+        tag: latest
+        imagePullPolicy: Always # Default "Always"
+      imagePullSecrets: 
+        - name: "ghcr-credential" # Name of secret contain credential to pull secret image
+    ingress:
+      path:
+      portNumber: 80
+  - name: otherService # Require
+    revisionHistoryLimit: 1 # Require
+    serviceType: ClusterIP # Require
+    ports:
+      - name: otherServicePort # Require
+        containerPort: 80 #Require
+        protocol: TCP # [TCP, UDP] Require
+        targetPort: 9090
+      - name: otherOtherPort # Require
+        containerPort: 90 #Require
+        protocol: TCP # [TCP, UDP] Require
+        targetPort: 1010
+    replicasCount: 1 # Require if autoscaling.enable is false
+    autoscaling: # optional
+      enable: false
+    podTemplate:
+      podAnnotations:  # optional
+        - podAnnotationsA: A
+        - podAnnotationsB: B
+      image:
+        name: nginx
+        tag: latest
+        imagePullPolicy: Always # Default "Always"
+        imagePullSecrets: "ghcr-credential" # Name of secret contain credential to pull secret image
+    ingress:
+      path: # default: /api/{{ services.name }}
+      portNumber: 80 # required
+  # - name: serviceA
+  #   revisionHistoryLimit: 1
+  #   ports:
+  #     - name: serviceAPort
+  #       containerPort: 90
+  #       protocol: TCP
+        

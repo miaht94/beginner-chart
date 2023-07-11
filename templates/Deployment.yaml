@@ -1,35 +1,47 @@
+{{- range $service := .Values.services }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "bitnews-chart.fullname" . }}
+  name: {{ include "MarshTravel.name" $| snakecase | replace "_" "-" | lower }}
   labels:
-    bitnews.app: backend
+    marshTravel.serviceName: {{ $service.name }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
+  {{- if not $service.autoscaling.enabled }}
+  replicas: {{ default 1 $service.replicaCount }}
   {{- end }}
-  revisionHistoryLimit: {{.Values.revisionHistoryLimit}}
+  revisionHistoryLimit: {{ $service.revisionHistoryLimit }}
   selector:
     matchLabels:
-      bitnews.app: backend
+      marshTravel.serviceName: {{ $service.name }}
+  {{- with $service.podTemplate }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
+      {{- with .podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        bitnews.app: backend
+        marshTravel.serviceName: {{ $service.name }}
+        {{- with .podLabels }}
+        {{- . | nindent 8}}
+        {{- end }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+      {{- with .image.imagePullSecrets }}
+      imagePullSecrets: {{ . }}
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}-backend
-          image: "{{ .Values.backend.image.name }}:{{ .Values.backend.image.tag }}"
-          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+        - name: {{ $service.name | lower | trunc 13}}-container
+          image: "{{ .image.name }}:{{ .image.tag }}"
+          imagePullPolicy: {{ default "Always" .image.pullPolicy }}
           ports:
-            - name: http
-              containerPort: 80
-              protocol: TCP
+            {{- range $port := $service.ports }}
+            - containerPort: {{ $port.containerPort }}
+              name: {{ $port.name | trunc 15 | lower}}
+              protocol: {{ $port.protocol }}
+            {{- end}}
+          {{- with .image.command }}
+          command: {{ . }}
+          {{- end }}
+  {{- end }}
+---
+{{- end }}
