@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "MarshTravel.name" $| snakecase | replace "_" "-" | lower }}
+  name: {{ $service.name }}-deployment
   labels:
     marshTravel.serviceName: {{ $service.name }}
 spec:
@@ -38,7 +38,7 @@ spec:
             - containerPort: {{ $port.containerPort }}
               name: {{ $port.name | trunc 15 | lower}}
               protocol: {{ $port.protocol }}
-            {{- end}}
+            {{- end }}
           {{- with .image.command }}
           command: {{ . }}
           {{- end }}

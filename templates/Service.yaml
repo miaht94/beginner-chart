@@ -12,9 +12,11 @@ spec:
     - port: {{ $port.containerPort }}
       name: {{ $port.name | lower | trunc 15 }}
       protocol: {{ $port.protocol }}
+      {{- if $port.targetPort }}
       targetPort: {{ $port.targetPort }}
+      {{- end }}
     {{- end }}
   selector:
-      marshTravel.serviceName: {{ $service.name | snakecase | lower | replace "_" "-"}}
+      marshTravel.serviceName: {{ $service.name }}
 ---
 {{- end }}

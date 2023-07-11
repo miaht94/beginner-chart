@@ -2,16 +2,12 @@ hostname: marshtravel.com
 services:
   - name: authentication # Require
     revisionHistoryLimit: 1 # Require
-    serviceType: ClusterIP # Require
+    serviceType: NodePort # Require
     ports: # require at least 1 port
-      - name: authPort # Require and unique for all
+      - name: authport # Require and unique for all
         containerPort: 80 #Require
         protocol: TCP # [TCP, UDP] Require
-        targetPort: 8080 # Required, If using service type NodePort or ClusterIP it must be unique
-      - name: otherPort # Require 
-        containerPort: 90 #Require
-        protocol: TCP # [TCP, UDP] Require
-        targetPort: 8081 # Required, If using service kind NodePort it must be unique
+        # targetPort: 80 # Required, If using service type NodePort or ClusterIP remove targetPort
     replicasCount: 1 # Require if autoscaling.enable is false
     autoscaling: # optional
       enable: false
@@ -28,30 +24,31 @@ services:
     ingress:
       path:
       portNumber: 80
-  - name: otherService # Require
+  - name: otherservice # Require
     revisionHistoryLimit: 1 # Require
-    serviceType: ClusterIP # Require
+    serviceType: NodePort # Require
     ports:
-      - name: otherServicePort # Require
+      - name: otherserviceport # Require
         containerPort: 80 #Require
         protocol: TCP # [TCP, UDP] Require
-        targetPort: 9090
-      - name: otherOtherPort # Require
+        # targetPort: 9090
+      - name: otherotherport # Require
         containerPort: 90 #Require
         protocol: TCP # [TCP, UDP] Require
-        targetPort: 1010
+        # targetPort: 1010
     replicasCount: 1 # Require if autoscaling.enable is false
     autoscaling: # optional
       enable: false
     podTemplate:
       podAnnotations:  # optional
-        - podAnnotationsA: A
-        - podAnnotationsB: B
+        podAnnotationsA: A
+        podAnnotationsB: B
       image:
         name: nginx
         tag: latest
         imagePullPolicy: Always # Default "Always"
-        imagePullSecrets: "ghcr-credential" # Name of secret contain credential to pull secret image
+        # imagePullSecrets: 
+        # - name: "ghcr-credential"
     ingress:
       path: # default: /api/{{ services.name }}
       portNumber: 80 # required
